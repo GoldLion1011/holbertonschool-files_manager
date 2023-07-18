@@ -1,5 +1,7 @@
 # Project 2385: Intricate Web Application
 
+<iframe src="https://giphy.com/embed/cOGVaEguK0gOfx1iak" width="480" height="400" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/theoffice-the-office-tv-take-your-daughter-to-work-day-cOGVaEguK0gOfx1iak">via GIPHY</a></p>
+
 ## Overview
 
 Welcome! This is an intricate web application project that involves building a sophisticated web application with various features. The project aims to enhance your web development skills, challenge your problem-solving abilities, and encourage collaboration with your team members.
