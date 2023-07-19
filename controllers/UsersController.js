@@ -42,6 +42,7 @@ const UsersController = {
   async postNew(req, res) {
     const { email, password } = req.body;
 
+    // Check if email and password are provided
     if (!email) {
       return res.status(400).json({ error: 'Missing email' });
     }
@@ -62,6 +63,7 @@ const UsersController = {
     // Hash the password using SHA1
     const hashedPassword = sha1(password);
 
+    // Create the new user object
     const newUser = {
       email,
       password: hashedPassword,
