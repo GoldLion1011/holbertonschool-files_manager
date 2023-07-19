@@ -2,7 +2,6 @@
 
 const redis = require('redis');
 
-
 class RedisClient {
   constructor() {
     this.client = redis.createClient();
@@ -53,6 +52,5 @@ class RedisClient {
 }
 
 const redisClient = new RedisClient();
-
 
 module.exports = redisClient;
