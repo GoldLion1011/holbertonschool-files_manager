@@ -18,6 +18,8 @@ class DBClient {
       return true;
     } catch (error) {
       return false;
+    } finally {
+      await this.client.close();
     }
   }
 
