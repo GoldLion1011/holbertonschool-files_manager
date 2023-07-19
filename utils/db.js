@@ -10,15 +10,20 @@ class DBClient {
     const url = `mongodb://${host}:${port}/${database}`;
 
     this.client = new MongoClient(url, { useUnifiedTopology: true });
+    this.isAlive = false; // Initialize isAlive to false by default
+  }
+
+  async connect() {
+    try {
+      await this.client.connect();
+      this.isAlive = true;
+    } catch (error) {
+      this.isAlive = false;
+    }
   }
 
   async isAlive() {
-    try {
-      await this.client.connect();
-      return true;
-    } catch (error) {
-      return false;
-    }
+    return this.isAlive;
   }
 
   async nbUsers() {
