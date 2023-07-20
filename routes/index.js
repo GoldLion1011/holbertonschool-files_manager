@@ -13,5 +13,4 @@ router.get('/users', UsersController.postNew);
 
 router.post('/users', UsersController.postNew);
 
-
 module.exports = router;
