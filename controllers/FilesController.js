@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import { ObjectID } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -32,7 +33,7 @@ const FilesController = {
 
     // Check parentId
     if (parentId) {
-      const parentFile = await dbClient.db.collection('files').findOne({ _id: parentId });
+      const parentFile = await dbClient.db.collection('files').findOne({ _id: ObjectID(parentId) }); // <-- Change this line
       if (!parentFile) {
         return res.status(400).json({ error: 'Parent not found' });
       }
@@ -46,6 +47,10 @@ const FilesController = {
     };
 
     if (type === 'folder') {
+      const existingFolder = await dbClient.db.collection('files').findOne({ name, type: 'folder', parentId: parentId || 0 });
+      if (existingFolder) {
+        return res.status(400).json({ error: 'Folder already exists' });
+      }
       const result = await dbClient.db.collection('files').insertOne(fileData);
       return res.status(201).json({
         id: result.insertedId, userId, name, type, isPublic: fileData.isPublic, parentId,
