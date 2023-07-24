@@ -1,10 +1,9 @@
 // Defines our Users controller
 
 const crypto = require('crypto');
+const { ObjectId } = require('mongodb');
 const dbClient = require('../utils/db');
 const redisClient = require('../utils/redis');
-const { ObjectId } = require('mongodb');
-
 
 const UsersController = {
   async postNew(req, res) {
@@ -30,7 +29,6 @@ const UsersController = {
       email: req.body.email,
       password: passwordHash,
     });
-    
 
     // Send response
     return res.status(201).json({
@@ -43,7 +41,7 @@ const UsersController = {
     // Check to see if the user exists
     const token = req.headers['x-token'];
     const userId = await redisClient.get(`auth_${token}`);
-  
+
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -55,8 +53,7 @@ const UsersController = {
     }
 
     return res.json({ id: user._id.toString(), email: user.email });
-
-  }
+  },
 };
 
 module.exports = UsersController;

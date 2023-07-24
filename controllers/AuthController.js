@@ -16,6 +16,11 @@ const AuthController = {
     const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
     const [email, password] = credentials.split(':');
 
+    // Checking for valid Base64
+    if (!email || !password) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const hashedPassword = crypto.createHash('sha1').update(password).digest('hex');
     const user = await dbClient.db.collection('users').findOne({ email, password: hashedPassword });
 
@@ -40,9 +45,8 @@ const AuthController = {
     await redisClient.del(`auth_${token}`);
 
     return res.status(204).end();
-
   },
-  
+
 };
 
 module.exports = AuthController;
