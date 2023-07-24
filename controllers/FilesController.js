@@ -86,12 +86,12 @@ const FilesController = {
     const { id } = req.params;
 
     // Retrieve user based on the token
-    // const token = req.headers['x-token'];
-    // const userId = await redisClient.get(`auth_${token}`);
+    const token = req.headers['x-token'];
+    const userId = await redisClient.get(`auth_${token}`);
 
-    // if (!userId) {
-    //   return res.status(401).json({ error: 'Unauthorized' });
-    // }
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     // Check if the file document is linked to the user and the ID passed as parameter
     const file = await dbClient.db.collection('files').findOne({
