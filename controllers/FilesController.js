@@ -81,6 +81,58 @@ const FilesController = {
       parentId,
     });
   },
+
+  async getShow(req, res) {
+    const { id } = req.params;
+
+    // Retrieve user based on the token
+    const token = req.headers['x-token'];
+    const userId = await redisClient.get(`auth_${token}`);
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check if the file document is linked to the user and the ID passed as parameter
+    const file = await dbClient.db.collection('files').findOne({
+      _id: ObjectID(id),
+      userId,
+    });
+
+    if (!file) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    // Return the file document
+    return res.status(200).json(file);
+  },
+
+  async getIndex(req, res) {
+    const { parentId = '0', page = 0 } = req.query;
+
+    // Retrieve user based on the token
+    const token = req.headers['x-token'];
+    const userId = await redisClient.get(`auth_${token}`);
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Pagination settings
+    const itemsPerPage = 20;
+    const skipCount = page * itemsPerPage;
+
+     // Retrieve the list of file documents based on the parentId and userId with pagination
+     const files = await dbClient.db.collection('files').find({
+      parentId,
+      userId,
+    })
+      .limit(itemsPerPage)
+      .skip(skipCount)
+      .toArray();
+
+    return res.status(200).json(files);
+  },    
 };
 
 module.exports = FilesController;
