@@ -122,17 +122,20 @@ const FilesController = {
     const itemsPerPage = 20;
     const skipCount = page * itemsPerPage;
 
-     // Retrieve the list of file documents based on the parentId and userId with pagination
-     const files = await dbClient.db.collection('files').find({
-      parentId,
-      userId,
-    })
+    // Find files based on the parentId and userId with pagination
+    let query = { userId };
+    if (parentId !== '0') {
+      query.parentId = parentId;
+    }
+
+    const files = await dbClient.db.collection('files')
+      .find(query)
       .limit(itemsPerPage)
       .skip(skipCount)
       .toArray();
 
     return res.status(200).json(files);
-  },    
+  },
 };
 
 module.exports = FilesController;
