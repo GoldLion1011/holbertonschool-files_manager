@@ -4,6 +4,7 @@ import path from 'path';
 import { ObjectID } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import { constants } from 'buffer';
 
 const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
 
@@ -123,7 +124,7 @@ const FilesController = {
     const skipCount = page * itemsPerPage;
 
     // Find files based on the parentId and userId with pagination
-    let query = { userId };
+    const query = { userId };
     if (parentId !== '0') {
       query.parentId = parentId;
     }
