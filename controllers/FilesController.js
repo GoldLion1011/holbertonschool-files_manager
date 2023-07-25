@@ -6,10 +6,11 @@ const mongo = require('mongodb');
 const fs = require('fs');
 const Redis = require('../utils/redis');
 const dbClient = require('../utils/db');
+const { fileQueue } = require('../queues'); // Import the Bull queue
 
 class FilesController {
-  static postUpload(req, res) {
-    (async () => {
+  static async postUpload(req, res) {
+    try {
       const token = req.headers['x-token'];
       const key = await Redis.get(`auth_${token}`);
 
@@ -77,6 +78,15 @@ class FilesController {
           parentId,
           filePath,
         });
+
+        if (type === 'image') {
+          // Add a job to the fileQueue for generating thumbnail
+          await fileQueue.add({
+            userId: key,
+            fileId: newFile.insertedId.toString(),
+            filePath,
+          });
+        }
       }
 
       return res.status(201).send({
@@ -87,10 +97,10 @@ class FilesController {
         isPublic,
         parentId,
       });
-    })().catch((err) => {
-      console.log(err);
-      return res.status(500).json({ error: err.toString() });
-    });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 
   static getShow(req, res) {
@@ -242,34 +252,49 @@ class FilesController {
     })();
   }
 
-  // static getFile(req, res) {
-  //   (async () => {
-  //     const token = req.headers['x-token'];
-  //     const user = await Redis.get(`auth_${token}`);
-  //     const file = await dbClient.db
-  //       .collection('files')
-  //       .findOne({ _id: new mongo.ObjectID(req.params.id) });
+  static async getFileData(req, res) {
+    try {
+      const { id } = req.params;
+      const { size } = req.query;
 
-  //     if (!file) {
-  //       return res.status(404).json({ error: 'Not found' });
-  //     }
+      if (!['500', '250', '100'].includes(size)) {
+        return res.status(400).json({ error: 'Invalid size parameter' });
+      }
 
-  //     if (!file.isPublic && (!user || user !== file.userId.toString())) {
-  //       return res.status(404).json({ error: 'Not found' });
-  //     }
+      const token = req.headers['x-token'];
+      const user = await Redis.get(`auth_${token}`);
 
-  //     if (file.type === 'folder') {
-  //       return res.status(400).json({ error: "A folder doesn't have content" });
-  //     }
+      if (!user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
-  //     if (!fs.existsSync(file.localPath)) {
-  //       return res.status(404).json({ error: 'Not found' });
-  //     }
+      const file = await dbClient.db
+        .collection('files')
+        .findOne({ _id: new mongo.ObjectID(id) });
 
-  //     const data = fs.readFileSync(file.localPath);
-  //     return res.status(200).send(data);
-  //   })();
-  // }
+      if (!file) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      if (!file.isPublic && (!user || user !== file.userId.toString())) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      const filePath = size
+        ? `${file.localPath}_${size}`
+        : file.localPath;
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      const data = fs.readFileSync(filePath);
+      return res.status(200).send(data);
+    } catch (error) {
+      console.error('Error getting file data:', error.message);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
 }
 
 module.exports = FilesController;
