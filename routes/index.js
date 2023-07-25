@@ -15,11 +15,14 @@ router.get('/connect', AuthController.getConnect);
 router.get('/disconnect', AuthController.getDisconnect);
 router.get('/users', UsersController.postNew);
 router.get('/users/me', UsersController.getMe);
-router.post('/files', FilesController.postUpload);
 router.get('/files/:id', FilesController.getShow);
 router.get('/files', FilesController.getIndex);
+router.get('/files/:id/data', FilesController.getFile);
+
 router.post('/users', UsersController.postNew);
-router.get('/files/:id/publish', FilesController.putPublish);
-router.get('/files/:id/unpublish', FilesController.putUnpublish);
+router.post('/files', FilesController.postUpload);
+
+router.put('/files/:id/publish', FilesController.putPublish);
+router.put('/files/:id/unpublish', FilesController.putUnpublish);
 
 module.exports = router;
