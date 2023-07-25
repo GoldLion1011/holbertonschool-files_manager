@@ -242,34 +242,34 @@ class FilesController {
     })();
   }
 
-  static getFile(req, res) {
-    (async () => {
-      const token = req.headers['x-token'];
-      const user = await Redis.get(`auth_${token}`);
-      const file = await dbClient.db
-        .collection('files')
-        .findOne({ _id: new mongo.ObjectID(req.params.id) });
+  // static getFile(req, res) {
+  //   (async () => {
+  //     const token = req.headers['x-token'];
+  //     const user = await Redis.get(`auth_${token}`);
+  //     const file = await dbClient.db
+  //       .collection('files')
+  //       .findOne({ _id: new mongo.ObjectID(req.params.id) });
 
-      if (!file) {
-        return res.status(404).json({ error: 'Not found' });
-      }
+  //     if (!file) {
+  //       return res.status(404).json({ error: 'Not found' });
+  //     }
 
-      if (!file.isPublic && (!user || user !== file.userId.toString())) {
-        return res.status(404).json({ error: 'Not found' });
-      }
+  //     if (!file.isPublic && (!user || user !== file.userId.toString())) {
+  //       return res.status(404).json({ error: 'Not found' });
+  //     }
 
-      if (file.type === 'folder') {
-        return res.status(400).json({ error: "A folder doesn't have content" });
-      }
+  //     if (file.type === 'folder') {
+  //       return res.status(400).json({ error: "A folder doesn't have content" });
+  //     }
 
-      if (!fs.existsSync(file.localPath)) {
-        return res.status(404).json({ error: 'Not found' });
-      }
+  //     if (!fs.existsSync(file.localPath)) {
+  //       return res.status(404).json({ error: 'Not found' });
+  //     }
 
-      const data = fs.readFileSync(file.localPath);
-      return res.status(200).send(data);
-    })();
-  }
+  //     const data = fs.readFileSync(file.localPath);
+  //     return res.status(200).send(data);
+  //   })();
+  // }
 }
 
 module.exports = FilesController;
