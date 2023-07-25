@@ -109,7 +109,10 @@ const FilesController = {
   },
 
   async getIndex(req, res) {
-    const { parentId = '0', page = 0 } = req.query;
+    let { parentId = '0', page = 0 } = req.query;
+
+    // Convert page to number
+    page = Number(page);
 
     // Retrieve user based on the token
     const token = req.headers['x-token'];
@@ -126,7 +129,7 @@ const FilesController = {
     // Find files based on the parentId and userId with pagination
     const query = { userId };
     if (parentId !== '0') {
-      query.parentId = parentId;
+      query.parentId = ObjectId(parentId);
     }
 
     const files = await dbClient.db.collection('files')
